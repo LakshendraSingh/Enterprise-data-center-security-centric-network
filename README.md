@@ -7,7 +7,7 @@ This repository contains two files:
 | File | Purpose |
 |---|---|
 | `SpineLeaf.pkt` | The Packet Tracer build (open in Cisco Packet Tracer). |
-| `Spine-leaf_data_centre_lab.html` | An interactive browser copy of the lab. Open it in any browser, pick a test from the menu, and watch packets cross the fabric. No install needed. |
+| `SpineLeaf.html` | An interactive browser copy of the lab. Open it in any browser, pick a test from the menu, and watch packets cross the fabric. No install needed. |
 
 > **Scope note.** This README is written from the interactive HTML copy, which reproduces the lab's topology, addressing, and command output. Details marked *(inferred)* are deduced from that output rather than read from the device configs. Check them against `SpineLeaf.pkt` before relying on them.
 
