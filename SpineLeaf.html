@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spine-leaf data centre lab</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#e4e9ec;--panel:#f6f8f9;--line:#b9c4ca;--ink:#1c2b33;--mute:#5d6f79;--node:#fff;--teal:#0e7a78;--grey:#8a98a1;--amber:#d98a00;--red:#c43b2d;--hover:#e3eef0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161c20;--panel:#1e262b;--line:#38464e;--ink:#dde5e9;--mute:#8fa0a9;--node:#26313a;--teal:#38b8b4;--grey:#6f808a;--amber:#f0a62b;--red:#ef6f60;--hover:#2a373e}}
+:root[data-theme="dark"]{--bg:#161c20;--panel:#1e262b;--line:#38464e;--ink:#dde5e9;--mute:#8fa0a9;--node:#26313a;--teal:#38b8b4;--grey:#6f808a;--amber:#f0a62b;--red:#ef6f60;--hover:#2a373e}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 "Segoe UI",Tahoma,system-ui,sans-serif}
+header{padding:10px 14px 0}
+h1{font-size:17px;margin:0;font-weight:600}
+header p{margin:2px 0 0;color:var(--mute);font-size:12.5px}
+.app{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,1fr);gap:12px;padding:10px 14px 14px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:4px}
+#topo{padding:6px}
+svg{display:block;width:100%;height:auto}
+.lk{stroke:var(--grey);stroke-width:1.6}
+.lk.f{stroke:var(--teal);stroke-width:2.6}
+.lk.hot{stroke:var(--amber);stroke-width:4}
+.lk.down{stroke:var(--red);stroke-dasharray:6 5;stroke-width:2}
+.nd rect.b{fill:var(--node);stroke:var(--line);stroke-width:1.2}
+.nd{cursor:pointer}.nd:hover rect.b,.nd.sel rect.b{stroke:var(--teal);stroke-width:2}
+.nd.flash rect.b{stroke:var(--red);stroke-width:3}
+.nd.off{opacity:.45}
+.nd text{fill:var(--ink);font-size:10.5px;font-weight:600}.nd text.s{fill:var(--mute);font-weight:400;font-size:9.5px}
+.ic *{fill:none;stroke:var(--ink);stroke-width:1.4}
+.x{fill:var(--red);font:700 18px sans-serif}
+#cap{padding:7px 10px;border-top:1px solid var(--line);min-height:34px;font-size:13px}
+.leg{display:flex;flex-wrap:wrap;gap:4px 16px;padding:6px 10px;border-top:1px solid var(--line);color:var(--mute);font-size:12px}
+.leg i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+.leg b{display:inline-block;width:10px;height:8px;margin-right:5px;border-radius:1px}
+.right{display:flex;flex-direction:column;gap:12px;min-width:0}
+.menu{max-height:40vh;overflow:auto}
+.menu h3{margin:0;padding:6px 10px 3px;font-size:12px;color:var(--mute);font-weight:600;background:var(--bg);position:sticky;top:0}
+.menu button{display:flex;width:100%;gap:8px;align-items:baseline;text-align:left;border:0;background:none;color:var(--ink);padding:5px 10px;cursor:pointer;font:inherit}
+.menu button:hover:not(:disabled){background:var(--hover)}
+.menu button:disabled{opacity:.5;cursor:default}
+.menu .d{flex:none;width:92px;color:var(--mute);font-size:12px}
+.menu code{font:12.5px Consolas,Menlo,monospace}
+.term{display:flex;flex-direction:column;min-height:340px;flex:1;background:#12181c;border-color:#12181c;color:#d3dce0;overflow:hidden}
+.th{display:flex;gap:8px;align-items:center;padding:6px 8px;background:#222d33;font-size:12px;color:#aebcc3}
+.th select,.th button{font:inherit;background:#12181c;color:#d3dce0;border:1px solid #3b4a52;border-radius:3px;padding:2px 6px;cursor:pointer}
+.th .sp{flex:1}
+#log{flex:1;overflow:auto;padding:8px 10px;font:12.5px/1.45 Consolas,Menlo,"DejaVu Sans Mono",monospace;white-space:pre-wrap;word-break:break-word;min-height:200px;max-height:60vh}
+#log .e{color:#ff9585}#log .g{color:#86d4b5}#log .c{color:#fff}#log .m{color:#7d909a}
+#inl{display:flex;padding:6px 10px 9px;font:12.5px Consolas,Menlo,monospace;border-top:1px solid #26333a}
+#pr{white-space:pre;color:#e9b44c}
+#in{flex:1;background:none;border:0;outline:0;color:#fff;font:inherit;padding:0 0 0 4px;min-width:0}
+@media (max-width:860px){.app{grid-template-columns:1fr}.menu{max-height:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>Enterprise data centre: spine-leaf lab</h1>
+<p>Interactive copy of the Packet Tracer build. Choose a command from the menu, or select a device and type it yourself (<code>help</code> lists what it accepts).</p>
+</header>
+<div class="app">
+<section class="box" aria-label="Topology">
+<div id="topo"><svg id="sv" viewBox="0 0 800 490" role="img" aria-label="Network topology"><g id="lks"></g><g id="nds"></g><g id="pk"></g></svg></div>
+<div id="cap">Ready. Run a test from the menu and watch the packets cross the fabric.</div>
+<div class="leg">
+<span><i style="border-color:var(--teal)"></i>Routed /30 link (OSPF)</span>
+<span><i style="border-color:var(--grey)"></i>Access link</span>
+<span><i style="border-color:var(--red);border-top-style:dashed"></i>Link down</span>
+<span><b style="background:#d98a00"></b>ICMP</span><span><b style="background:#2f9e6b"></b>DHCP</span><span><b style="background:#8a5fc4"></b>DNS</span><span><b style="background:#2f78c8"></b>HTTP</span><span><b style="background:#6b7780"></b>SSH</span>
+</div>
+</section>
+<div class="right">
+<section class="box menu" id="menu" aria-label="Command menu"></section>
+<section class="box term" aria-label="Terminal">
+<div class="th"><label for="dev">Console</label><select id="dev"></select><span class="sp"></span><button id="stop" title="Stop ping -t">Ctrl+C</button><button id="clr">Clear</button><button id="rst">Reset lab</button></div>
+<div id="log" aria-live="polite"></div>
+<div id="inl"><span id="pr"></span><input id="in" autocomplete="off" spellcheck="false" aria-label="Command"></div>
+</section>
+</div>
+</div>
+<script>
+const $=s=>document.querySelector(s),sleep=ms=>new Promise(r=>setTimeout(r,ms)),NS='http://www.w3.org/2000/svg';
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches,HOP=RM?60:300;
+// id:[x,y,icon,name,sub,prompt]
+const N={R:[400,50,'r','Edge-Router','Cisco 2911','Edge-Router#'],CS:[150,50,'sw','Campus-SW','Catalyst 2960','Campus-SW#'],
+P1:[62,140,'pc','Employee-PC-1','DHCP client','C:\\>'],P2:[218,140,'pc','Employee-PC-2','DHCP client','C:\\>'],
+S1:[270,170,'sw','Spine-01','3560-24PS','Spine-01#'],S2:[530,170,'sw','Spine-02','3560-24PS','Spine-02#'],
+L1:[130,300,'sw','Leaf-01','VLAN 10 web','Leaf-01#'],L2:[400,300,'sw','Leaf-02','VLAN 20, 30','Leaf-02#'],L3:[670,300,'sw','Leaf-03','VLAN 40, 99','Leaf-03#'],
+W:[130,430,'sv','Web-Server','10.10.10.11','Web-Server>'],A:[300,430,'sv','App-Server','10.10.20.11','App-Server>'],D:[440,430,'sv','DB-Server','10.10.30.11','DB-Server>'],
+V:[595,430,'sv','Services-Server','10.10.40.11','Services>'],M:[735,430,'pc','Admin-PC','10.99.99.10','C:\\>']};
+const LK=[['R','S1','f'],['R','S2','f'],['S1','L1','f'],['S1','L2','f'],['S1','L3','f'],['S2','L1','f'],['S2','L2','f'],['S2','L3','f'],
+['R','CS'],['CS','P1'],['CS','P2'],['L1','W'],['L2','A'],['L2','D'],['L3','V'],['L3','M']];
+const ICON={r:'<circle r="9"/><path d="M-5 0H5M-2 -3L-5 0L-2 3M2 -3L5 0L2 3M0 -6V6"/>',sw:'<rect x="-10" y="-6" width="20" height="12" rx="1"/><path d="M-6 -2H6M3 -4L6 -2L3 0M6 2H-6M-3 0L-6 2L-3 4"/>',
+sv:'<rect x="-7" y="-9" width="14" height="5"/><rect x="-7" y="-2.5" width="14" height="5"/><rect x="-7" y="4" width="14" height="5"/>',pc:'<rect x="-9" y="-8" width="18" height="12" rx="1"/><path d="M-4 9H4M0 4V9"/>'};
+const L={},E={};
+const mk=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||$('#sv')).appendChild(e);return e};
+LK.forEach(([a,b,k])=>{const e=mk('line',{x1:N[a][0],y1:N[a][1],x2:N[b][0],y2:N[b][1],class:'lk '+(k||'')},$('#lks'));L[a+b]=L[b+a]=e});
+for(const id in N){const[x,y,ic,nm,sb]=N[id];const g=mk('g',{class:'nd',transform:`translate(${x} ${y})`,tabindex:0},$('#nds'));E[id]=g;
+g.innerHTML=`<rect class="b" x="-58" y="-19" width="116" height="38" rx="4"/><g class="ic" transform="translate(-40 0)">${ICON[ic]}</g><text x="-24" y="-2">${nm}</text><text class="s" x="-24" y="11">${sb}</text>`;
+g.onclick=()=>setDev(id);g.onkeydown=e=>{if(e.key=='Enter')setDev(id)}}
+// ---- state
+let st,cur='P1',busy=false;
+const reset=()=>{st={s1:true,stale:0,alt:false,arp:{},deny:0,permit:0,bg:false,leased:false};
+for(const k in L)L[k].classList.remove('down','hot');for(const k in E)E[k].classList.remove('off','flash');setCap('Ready. Run a test from the menu and watch the packets cross the fabric.')};
+const setCap=t=>$('#cap').textContent=t;
+// ---- terminal
+const log=$('#log'),inp=$('#in');
+async function print(t,c){for(const ln of String(t).split('\n')){const d=document.createElement('div');d.textContent=ln||' ';if(c)d.className=c;log.appendChild(d);log.scrollTop=log.scrollHeight;await sleep(RM?0:35)}}
+const prompt=e=>(e&&e.pr)||N[cur][5];
+function setDev(id){cur=id;$('#dev').value=id;$('#pr').textContent=N[id][5];for(const k in E)E[k].classList.toggle('sel',k==id);inp.focus({preventScroll:true})}
+for(const id in N)$('#dev').add(new Option(N[id][3],id));
+$('#dev').onchange=e=>setDev(e.target.value);
+// ---- packets
+function fly(path,col,drop=-1){return new Promise(async res=>{
+const g=mk('g',{},$('#pk'));g.innerHTML=`<rect x="-7" y="-5" width="14" height="10" rx="1.5" fill="${col}" stroke="#fff" stroke-width="1.2"/><path d="M-7 -5L0 1L7 -5" fill="none" stroke="#fff" stroke-width="1.2"/>`;
+for(let i=1;i<path.length;i++){const a=N[path[i-1]],b=N[path[i]],ln=L[path[i-1]+path[i]];ln&&ln.classList.add('hot');
+await new Promise(r=>{const t0=performance.now();(function f(t){const k=Math.min(1,(t-t0)/HOP);g.setAttribute('transform',`translate(${a[0]+(b[0]-a[0])*k} ${a[1]+(b[1]-a[1])*k})`);k<1?requestAnimationFrame(f):r()})(t0)});
+ln&&ln.classList.remove('hot');
+if(i==drop){const n=E[path[i]];n.classList.add('flash');const x=mk('text',{class:'x',x:b[0]-6,y:b[1]-24},$('#pk'));x.textContent='✕';g.remove();setTimeout(()=>{x.remove();n.classList.remove('flash')},900);return res(false)}}
+g.remove();res(true)})}
+const rt=async(p,c,d)=>{if(!await fly(p,c,d))return false;await fly([...p].reverse(),c);return true};
+const COL={i:'#d98a00',d:'#2f9e6b',n:'#8a5fc4',h:'#2f78c8',s:'#6b7780'};
+// ---- routing helpers
+const CAMP=['P1','CS','R'];
+function spine(){if(st.s1){st.alt=!st.alt;return st.alt?'S1':'S2'}if(st.stale>0){st.stale--;return'S1*'}return'S2'}
+function toLeaf(leaf,host){const sp=spine();if(sp=='S1*')return{p:[...CAMP,'S1'],dead:1};return{p:[...CAMP,sp,leaf,...(host?[host]:[])]}}
+const rnd=()=>2+Math.floor(Math.random()*8);
+async function ping(ip,n,ttl,mkp){await print(`\nPinging ${ip} with 32 bytes of data:\n`);let rec=0,t=[];
+for(let i=0;i<n;i++){const r=mkp(i),ok=await rt(r.p,COL.i,r.drop??-1);
+if(ok){const ms=rnd();t.push(ms);rec++;await print(`Reply from ${ip}: bytes=32 time=${ms}ms TTL=${ttl}`)}else await print(r.msg||'Request timed out.','e')}
+await pstats(ip,n,rec,t)}
+async function pstats(ip,n,rec,t){await print(`\nPing statistics for ${ip}:\n    Packets: Sent = ${n}, Received = ${rec}, Lost = ${n-rec} (${Math.round((n-rec)/n*100)}% loss),`);
+if(rec)await print(`Approximate round trip times in milli-seconds:\n    Minimum = ${Math.min(...t)}ms, Maximum = ${Math.max(...t)}ms, Average = ${Math.round(t.reduce((a,b)=>a+b)/rec)}ms`)}
+const webPath=i=>{const r=toLeaf('L1','W');if(r.dead)return{p:r.p,drop:r.p.length-1};
+if(i==0&&!st.arp.w){st.arp.w=1;return{p:r.p,drop:r.p.length-2}}return{p:r.p}};
+const ospfHello=async(from,to)=>{await Promise.all(to.map(t=>rt([from,t],'#0e7a78')))};
+// ---- command registry
+const R=[];const add=(n,dev,cmd,fn,o={})=>R.push({n,dev,cmd,fn,...o});
+add(1,'P1','ping 10.10.10.11',async()=>{setCap('Employee-PC-1 → Campus-SW → Edge-Router → a spine → Leaf-01 → Web-Server. The first request waits on ARP, so it can time out.');await ping('10.10.10.11',4,125,webPath)});
+add(2,'P1','ipconfig /renew',async()=>{
+setCap('DHCP Discover is a broadcast. The router will not forward it, so ip helper-address relays it to 10.10.40.11 as unicast.');
+await print('\nContacting DHCP server...');await rt(['P1','CS'],COL.d);await fly(['P1','CS','P2'],COL.d);await fly(['CS','R'],COL.d);
+setCap('Relay: Edge-Router → spine → Leaf-03 → Services-Server (unicast). Offer and ACK come back the same way.');
+const sp=spine().replace('*','').replace('S1','S1');const p=['R',st.s1?sp:'S2','L3','V'];await rt(p,COL.d);await fly(['R','CS','P1'],COL.d);st.leased=true;
+await print('\nIP Address......................: 192.168.10.100\nSubnet Mask.....................: 255.255.255.0\nDefault Gateway.................: 192.168.10.1\nDNS Server......................: 10.10.40.11','g')});
+add(3,'P1','browser http://www.company.local',async()=>{
+if(!st.leased){await print('No IP address yet. Run ipconfig /renew first (test 2).','e');return}
+setCap('Step 1: DNS query for www.company.local goes to the Services-Server.');await print('\nResolving www.company.local ...');
+let sp=st.s1?(st.alt=!st.alt)?'S1':'S2':'S2';await rt([...CAMP,sp,'L3','V'],COL.n);await print('DNS: www.company.local = 10.10.10.11','g');
+setCap('Step 2: HTTP GET goes through a spine to Leaf-01 and the Web-Server. The page comes back the same way.');
+sp=st.s1?(st.alt=!st.alt)?'S1':'S2':'S2';await rt([...CAMP,sp,'L1','W'],COL.h);
+await print('\nHTTP/1.1 200 OK\nContent-Type: text/html\n\n<html><body><h1>Company Web Server</h1>\n<p>Served by Web-Server 10.10.10.11</p></body></html>','g')});
+add(4,'S1','show ip ospf neighbor',async()=>{
+if(!st.s1){await print('\n(no output: every Spine-01 fabric port is shut down, so there are no adjacencies)','m');return}
+setCap('OSPF hello packets from Spine-01 to its four neighbours: the router and the three leaves.');await ospfHello('S1',['R','L1','L2','L3']);
+await print('\nNeighbor ID     Pri   State        Dead Time   Address         Interface\n1.1.1.1           1   FULL/BDR     00:00:33    10.0.0.1        GigabitEthernet0/1\n3.3.3.1           1   FULL/BDR     00:00:36    10.1.1.2        FastEthernet0/1\n3.3.3.2           1   FULL/BDR     00:00:38    10.1.1.6        FastEthernet0/2\n3.3.3.3           1   FULL/BDR     00:00:31    10.1.1.10       FastEthernet0/3','g')});
+add(5,'L1','show ip route ospf',async()=>{
+setCap('Leaf-01 to Leaf-02 via Spine-01 or Spine-02. Equal cost, so OSPF installs both next hops (ECMP).');
+const pr=[['L1','S2','L2']];if(st.s1)pr.unshift(['L1','S1','L2']);await Promise.all(pr.map(p=>fly(p,COL.i)));
+const r=(net,c)=>st.s1?`O    ${net} [110/${c}] via 10.1.1.1, 00:12:41, FastEthernet0/23\n                    [110/${c}] via 10.1.2.1, 00:12:41, FastEthernet0/24`:`O    ${net} [110/${c}] via 10.1.2.1, 00:00:09, FastEthernet0/24`;
+await print('\n     10.0.0.0/8 is variably subnetted\n'+(st.s1?'O    10.0.0.0/30 [110/2] via 10.1.1.1, 00:12:41, FastEthernet0/23\n':'')+'O    10.0.0.4/30 [110/2] via 10.1.2.1, 00:12:41, FastEthernet0/24\n'+['10.10.20.0/24|3','10.10.30.0/24|3','10.10.40.0/24|3','10.99.99.0/24|3'].map(s=>r(...s.split('|'))).join('\n')+'\n'+r('192.168.10.0/24',3),'g')});
+add(6,'P1','ping 10.10.30.11',async()=>{setCap('Employee-PC-1 is not in the app tier. Leaf-02 applies PROTECT-DB on Vlan30 and drops the packet.');
+await ping('10.10.30.11',4,125,i=>{const r=toLeaf('L2');if(r.dead)return{p:r.p,drop:r.p.length-1};st.deny++;return{p:[...r.p,'D'],drop:r.p.length-1,msg:'Reply from 10.10.30.1: Destination host unreachable.'}})});
+add(6,'A','ping 10.10.30.11',async()=>{setCap('App-Server is in 10.10.20.0/24, which PROTECT-DB permits. Traffic crosses Leaf-02 only.');
+await ping('10.10.30.11',4,127,i=>{st.permit++;return{p:['A','L2','D']}})});
+add(6,'L2','show access-lists',async()=>{await print(`\nExtended IP access list PROTECT-DB\n    10 permit ip 10.10.20.0 0.0.0.255 10.10.30.0 0.0.0.255${st.permit?` (${st.permit*4} match(es))`:''}\n    20 permit ip host 10.99.99.10 10.10.30.0 0.0.0.255\n    30 deny ip any any${st.deny?` (${st.deny*1} match(es))`:''}`,'g')});
+add(7,'M','ssh -l admin 10.99.99.1',async()=>{setCap('Admin-PC is 10.99.99.10, the only address the VTY access-class permits.');await rt(['M','L3'],COL.s);
+await print('\nOpen\nPassword: ********\n\nLeaf-03>','g')});
+add(7,'P1','ssh -l admin 10.99.99.1',async()=>{setCap('The login attempt reaches Leaf-03, but access-class 10 only permits 10.99.99.10.');const r=toLeaf('L3');
+await fly(r.p,COL.s,r.p.length-1);await print('\n% Connection refused by remote host','e')});
+add(8,'P1','ping -t 10.10.10.11',async()=>{if(st.bg)return;pingT()},{free:1});
+add(8,'S1','shutdown',async()=>{
+await print('Spine-01(config)#interface range fa0/1 - 3 , gi0/1','c');await print('Spine-01(config-if-range)#shutdown','c');
+if(!st.s1){return}st.s1=false;st.stale=2;E.S1.classList.add('off');['RS1','S1L1','S1L2','S1L3'].forEach(k=>L[k].classList.add('down'));
+setCap('Spine-01 is down. OSPF takes a moment to notice, then everything moves to Spine-02.');
+for(const i of ['FastEthernet0/1','FastEthernet0/2','FastEthernet0/3','GigabitEthernet0/1'])await print(`%LINK-5-CHANGED: Interface ${i}, changed state to administratively down`,'m');
+await print('%OSPF-5-ADJCHG: Process 1, Nbr 3.3.3.1 on FastEthernet0/1 from FULL to DOWN, Neighbor Down: Interface down or detached','m')},{free:1,pr:'Spine-01(config-if-range)#',norm:1});
+add(8,'S1','no shutdown',async()=>{await print('Spine-01(config)#interface range fa0/1 - 3 , gi0/1','c');await print('Spine-01(config-if-range)#no shutdown','c');
+if(st.s1)return;st.s1=true;E.S1.classList.remove('off');['RS1','S1L1','S1L2','S1L3'].forEach(k=>L[k].classList.remove('down'));setCap('Spine-01 is back. OSPF forms adjacencies again and ECMP uses both spines.');
+await print('%OSPF-5-ADJCHG: Process 1, Nbr 3.3.3.1 on FastEthernet0/1 from LOADING to FULL, Loading Done','g')},{free:1,pr:'Spine-01(config-if-range)#',norm:1});
+add(9,'L2','show vlan brief',async()=>{await print('\nVLAN Name                             Status    Ports\n---- -------------------------------- --------- ----------------------\n1    default                          active    Fa0/3-22, Gi0/1-2\n20   APP                              active    Fa0/1\n30   DB                               active    Fa0/2\n1002 fddi-default                     active\n1003 token-ring-default               active','g')});
+async function pingT(){st.bg=true;let n=0,rec=0,t=[];setCap('Continuous ping running. Now shut down Spine-01 from the menu.');await print('\nPinging 10.10.10.11 with 32 bytes of data:\n');
+while(st.bg){n++;const r=webPath(1),ok=await rt(r.p,COL.i,r.drop??-1);if(ok){const ms=rnd();t.push(ms);rec++;await print(`Reply from 10.10.10.11: bytes=32 time=${ms}ms TTL=125`)}else await print('Request timed out.','e');await sleep(RM?100:250)}
+await pstats('10.10.10.11',n,rec,t);await print('Control-C','c')}
+// ---- menu + exec
+const TITLES={1:'Test 1. Reachability',2:'Test 2. DHCP relay',3:'Test 3. DNS and HTTP',4:'Test 4. OSPF neighbours',5:'Test 5. ECMP',6:'Test 6. Database ACL',7:'Test 7. SSH access',8:'Test 8. Spine failover',9:'Extra'};
+let last=0;const menu=$('#menu');
+R.forEach((e,i)=>{if(e.n!=last){last=e.n;const h=document.createElement('h3');h.textContent=TITLES[e.n];menu.appendChild(h)}
+const b=document.createElement('button');b.innerHTML=`<span class="d">${N[e.dev][3]}</span><code></code>`;b.lastChild.textContent=e.cmd;b.onclick=()=>run(e);e.btn=b;menu.appendChild(b)});
+async function typeIn(t){inp.value='';for(const ch of t){inp.value+=ch;await sleep(RM?0:22)}await sleep(RM?0:150)}
+async function run(e){if(busy&&!e.free)return;setDev(e.dev);$('#pr').textContent=prompt(e);await typeIn(e.cmd);await exec(inp.value)}
+async function exec(txt){txt=txt.trim();inp.value='';const e=R.find(x=>x.dev==cur&&x.cmd==txt.toLowerCase());
+if(!e||!e.norm)await print(prompt(e)+txt,'c');$('#pr').textContent=N[cur][5];if(!txt)return;
+if(!e){if(txt=='help'||txt=='?')await print('Commands on '+N[cur][3]+':\n'+(R.filter(x=>x.dev==cur).map(x=>'  '+x.cmd).join('\n')||'  (none in this lab)'),'m');
+else if(txt=='clear'||txt=='cls')log.textContent='';else await print(N[cur][5].endsWith('>')&&N[cur][5][1]!=':'||cur[0]=='P'||cur=='M'?'Invalid Command.':'% Invalid input detected. Type help.','e');return}
+if(busy&&!e.free){await print('Wait for the running command to finish.','m');return}
+if(!e.free)busy=true,setBtns();try{await e.fn()}finally{if(!e.free)busy=false;setBtns()}}
+const setBtns=()=>R.forEach(e=>e.btn.disabled=busy&&!e.free);
+inp.addEventListener('keydown',e=>{if(e.key=='Enter')exec(inp.value);if(e.key=='c'&&e.ctrlKey)stop()});
+const stop=()=>{if(st.bg)st.bg=false};$('#stop').onclick=stop;
+$('#clr').onclick=()=>log.textContent='';
+$('#rst').onclick=()=>{st.bg=false;reset();busy=false;setBtns();log.textContent='';print('Lab reset. Spine-01 is up, no DHCP lease.','m')};
+reset();setDev('P1');print('Spine-leaf data centre. 14 devices, OSPF area 0.\nPick a command from the menu, or select a device and type.','m');
+</script>
+</body>
+</html>
